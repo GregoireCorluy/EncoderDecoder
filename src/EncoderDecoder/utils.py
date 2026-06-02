@@ -77,7 +77,7 @@ class loadData:
             weights_only=False,
             map_location=torch.device(device)
         )
-
+        
         model_reloaded.load_state_dict(state_dict)
 
         return model_reloaded
