@@ -24,7 +24,7 @@ class PV_autoencoder(nn.Module):
     """
 
     def __init__(   self, nbr_species, PV_dim, output_dim, decoder_layers,
-                    auto_scaling = False, activation_function = "tanh",
+                    species_scaling_layer = False, activation_function = "tanh",
                     activation_function_output = "tanh", fixed_PV = False,
                     extra_manifold_parameters = [], dropout_decoder_layers = False,
                     p_dropout = -1, **kwargs):
@@ -44,9 +44,9 @@ class PV_autoencoder(nn.Module):
         n_decoder = copy.deepcopy(decoder_layers)
         n_decoder.append(0) #add the zero for the output layer
         
-        self.auto_scaling = auto_scaling
+        self.species_scaling_layer = species_scaling_layer
         #Automatic scaling of the input species
-        if(self.auto_scaling):
+        if(self.species_scaling_layer):
             self.scaling_weights = nn.Parameter(torch.ones(self.nbr_species, dtype=torch.float64))
             #self.scaling_biases = nn.Parameter(torch.zeros(self.nbr_species, dtype=torch.float64))
 
@@ -117,19 +117,19 @@ class PV_autoencoder(nn.Module):
         species = input_data[:, :self.nbr_species]  
 
         #scale the species
-        if(self.auto_scaling):
+        if(self.species_scaling_layer):
             species_scaled = species * self.scaling_weights  #+ self.scaling_biases
 
         #Combine the species to get the PV
         if(not self.fixed_PV): #in case there is no fixed PV, use the species or scaled species for all the rows
-            if(not self.auto_scaling):
+            if(not self.species_scaling_layer):
                 PV = self.encoder_species(species)
-            elif(self.auto_scaling):
+            elif(self.species_scaling_layer):
                 PV = self.encoder_species(species_scaled)
         elif(self.fixed_PV): #in case the first PV is fixed
-            if(not self.auto_scaling):
+            if(not self.species_scaling_layer):
                 PV = self.encoder_species(species)
-            elif(self.auto_scaling): #do not apply the scaling to the row of the fixed PV which is already scaled
+            elif(self.species_scaling_layer): #do not apply the scaling to the row of the fixed PV which is already scaled
                 PV_fixed = self.encoder_species(species)[:,0].unsqueeze(1) #keep the first column
                 PV_others  = self.encoder_species(species_scaled)[:, 1:] #keep all the columns except the first one
 
@@ -160,7 +160,7 @@ class PV_autoencoder(nn.Module):
                 if layer.bias is not None:
                     nn.init.constant_(layer.bias, 0)  # Initialize bias to zero
         
-        if(self.auto_scaling):
+        if(self.species_scaling_layer):
             low, high = init_scaling
             nn.init.uniform_(self.scaling_weights, a=low, b=high, generator = generator)
 
@@ -236,7 +236,7 @@ class PV_autoencoder(nn.Module):
 
     def get_scaled_encoder_weights(self):
         
-        if(self.auto_scaling):
+        if(self.species_scaling_layer):
             return self.scaling_weights.detach()*self.encoder_species.weight.detach()
         else:
             print("Warning: model has no scaling layer. Only encoder weights returned")
@@ -244,7 +244,7 @@ class PV_autoencoder(nn.Module):
 
     def get_total_encoder_weights(self, npy = False):
 
-        if(self.auto_scaling):
+        if(self.species_scaling_layer):
             total_weights = self.scaling_weights.detach()*self.encoder_species.weight.detach()
         else:
             total_weights = self.encoder_species.weight.detach()

@@ -73,7 +73,7 @@ class loadData:
 
         model_reloaded = PV_autoencoder(**self.model_params)
         state_dict = torch.load(
-            "out/" + filename_model,
+            "data-files/out/" + filename_model,
             weights_only=False,
             map_location=torch.device(device)
         )
@@ -111,14 +111,14 @@ class loadData:
         general_dataset_type = self.metadata["general_dataset_type"]
         dataset_type = self.metadata["dataset_type"]
         list_species_input = self.metadata["list_species_input"]
-        list_species_output = self.metadata["list_species_output"]
+        list_species_output = self.metadata["list_species_output_evaluation"]
         input_scaling_name = self.metadata["input_scaling_name"]
-        input_scaling = self.metadata["input_scaling"]
-        input_bias = self.metadata["input_bias"]
-        temperature_at_output = self.metadata["temperature_at_output"]
-        header = self.metadata["header"]
-        extra_manifold_variables = self.metadata["extra_manifold_variables"]
-        range_extra_manifold_variables = self.metadata["extra_manifold_variables"]
+        input_scaling = self.metadata["input_species_scaling"]
+        input_bias = self.metadata["input_species_bias"]
+        temperature_at_output = self.metadata["temperature_output"]
+        header = "infer"
+        extra_manifold_variables = self.metadata["extra_manifold_parameters"]
+        range_extra_manifold_variables = self.metadata["range_extra_manifold_parameters"]
 
         #get input/output
         input, output = get_dataset_analysis(path_data, general_dataset_type, dataset_type, list_species_input, list_species_output,
@@ -131,7 +131,7 @@ class loadData:
 
         input, output = self.getInputOutput(path_data, dataset_type)
 
-        model = self.loadModel(self.filename)
+        model = self.loadModel(self.filename_model)
 
         extraVars, PV, PVsource = model.get_extraVar_PV_PVsource(input, output)
 
