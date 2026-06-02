@@ -44,12 +44,12 @@ class create_dirs:
         self.dataset_type = dataset_type,
         self.formatted_date = current_time.strftime('%d%b%Y')
         self.formatted_time = current_time.strftime('%Hh%M')
-        self.train_info_path = 'train-info/trained-models.csv'
+        self.train_info_path = 'data-files/train-info/trained-models.csv'
         self.training_id = training_id
 
-        self.path_out = "out/"
-        self.path_curve = "curves/"
-        self.path_metadata = "metadata/"
+        self.path_out = "data-files/out/"
+        self.path_curve = "data-files/curves/"
+        self.path_metadata = "data-files/metadata/"
 
         self.training_name = '{}-AE-date_{}-hour_{}_{}-{}'.format(
             self.training_id,
@@ -70,8 +70,8 @@ class create_dirs:
         if not os.path.exists(self.path_out):
             os.makedirs(self.path_out)
 
-        if not os.path.exists('train-info/'):
-            os.makedirs('train-info/')
+        if not os.path.exists('data-files/train-info/'):
+            os.makedirs('data-files/train-info/')
         
         if not os.path.exists(self.path_curve):
             os.makedirs(self.path_curve)
