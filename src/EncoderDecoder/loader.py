@@ -59,7 +59,7 @@ class loadData:
 
     def loadCurves(self):
 
-        df = pd.read_csv('curves/' + self.filename_curve, header=None)
+        df = pd.read_csv('data-files/curves/' + self.filename_curve, header=None)
 
         training = df.iloc[0]  #Training curve
         validation = df.iloc[1]  #Validation curve
