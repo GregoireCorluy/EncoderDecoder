@@ -41,7 +41,7 @@ class create_dirs:
 
     def __init__(self, overall_dataset, dataset_type, current_time, training_id):
         self.overall_dataset = overall_dataset
-        self.dataset_type = dataset_type,
+        self.dataset_type = dataset_type
         self.formatted_date = current_time.strftime('%d%b%Y')
         self.formatted_time = current_time.strftime('%Hh%M')
         self.train_info_path = 'data-files/train-info/trained-models.csv'
