@@ -1,7 +1,9 @@
 import pickle
 from csv import reader
 from EncoderDecoder.models import PV_autoencoder
+from EncoderDecoder.utils import get_dataset_analysis
 import pandas as pd
+import torch
 
 """
 PV optimization using an encoder-decoder architecture (Kamila Zdybal)
@@ -14,13 +16,14 @@ Python version: 3.10.10
 class loadData:
     """ Load model, curves and metadata """
 
-    def __init__(self, filename_state_space_names, path_metadata, filename_metadata):
+    def __init__(self, filename, suffix_filename_state_space_names = "", path_metadata = "data-files/metadata/"):
         
         self.path_metadata = path_metadata
-        self.filename_metadata = filename_metadata
+        self.filename = filename
+        self.filename_metadata = self.filename + "_metadata.pkl"
         self.metadata = self.loadMetadata()
 
-        self.filename_state_space_names = filename_state_space_names
+        self.filename_state_space_names = f"Xu-state-space-names{suffix_filename_state_space_names}.csv"
         self.filename_model = self.metadata["model_name"]
         self.filename_curve = self.metadata["curve_name"]
 
@@ -79,3 +82,35 @@ class loadData:
     def updateStateSpaceNames(self, newFileStateSpaceNames):
 
         self.filename_state_space_names = newFileStateSpaceNames
+
+    def getInputOutput(self, path_data, dataset_type):
+        
+        path_data = path_data
+        general_dataset_type = self.metadata["general_dataset_type"]
+        dataset_type = self.metadata["dataset_type"]
+        list_species_input = self.metadata["list_species_input"]
+        list_species_output = self.metadata["list_species_output"]
+        input_scaling_name = self.metadata["input_scaling_name"]
+        input_scaling = self.metadata["input_scaling"]
+        input_bias = self.metadata["input_bias"]
+        temperature_at_output = self.metadata["temperature_at_output"]
+        header = self.metadata["header"]
+        extra_manifold_variables = self.metadata["extra_manifold_variables"]
+        range_extra_manifold_variables = self.metadata["extra_manifold_variables"]
+
+        #get input/output
+        input, output = get_dataset_analysis(path_data, general_dataset_type, dataset_type, list_species_input, list_species_output,
+                                        input_scaling_name, input_scaling, input_bias, temperature_at_output,
+                                        header, extra_manifold_variables, range_extra_manifold_variables)
+
+        return input, output
+
+    def getManifoldParameters(self, path_data, dataset_type):
+
+        input, output = self.getInputOutput(path_data, dataset_type)
+
+        model = self.loadModel(self.filename)
+
+        extraVars, PV, PVsource = model.get_extraVar_PV_PVsource(input, output)
+
+        return extraVars, PV, PVsource
