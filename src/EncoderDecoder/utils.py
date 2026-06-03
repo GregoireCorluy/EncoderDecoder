@@ -136,6 +136,19 @@ class loadData:
         extraVars, PV, PVsource = model.get_extraVar_PV_PVsource(input, output)
 
         return extraVars, PV, PVsource
+    
+    def getSpecies(self, path_data, general_dataset_type, dataset_type, species):
+        path_data_state_space = path_data + f"{general_dataset_type}-state-space-{dataset_type}.csv"
+        
+        #load the data
+        data_state_space = read_csv(path_data_state_space, header = "infer")
+        
+        data_species = data_state_space[species]
+
+        return data_species
+
+
+
 
 #################################
 #Create directories and filenames
