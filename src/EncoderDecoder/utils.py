@@ -137,6 +137,20 @@ class loadData:
 
         return extraVars, PV, PVsource
     
+    def getInputOutputAnalysis(self, path_data, dataset_type):
+
+        input, output = self.getInputOutput(path_data, dataset_type)
+
+        model = self.loadModel(self.filename_model)
+
+        output_with_PVsource = model.get_source_PV(output, self.metadata["input_species_scaling"])
+
+        extraVars, PV, _ = model.get_extraVar_PV_PVsource(input, output)
+
+        input_with_PV = np.concatenate([PV, extraVars], axis = 1)
+
+        return input_with_PV, output_with_PVsource.detach().numpy()
+    
     def getSpecies(self, path_data, general_dataset_type, dataset_type, species):
         path_data_state_space = path_data + f"{general_dataset_type}-state-space-{dataset_type}.csv"
         
