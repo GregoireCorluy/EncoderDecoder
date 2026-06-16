@@ -64,7 +64,9 @@ class loadData:
     def loadMetadata(self):
 
         with open(f'{self.path_metadata}/{self.filename_metadata}', 'rb') as f:
+            print("before pickle load")
             loaded_dict = pickle.load(f)
+            print("after pickle load")
 
         return loaded_dict
     
