@@ -74,7 +74,7 @@ class loadData:
         model_reloaded = PV_autoencoder(**self.model_params)
         state_dict = torch.load(
             "data-files/out/" + filename_model,
-            weights_only=False,
+            weights_only=True, #previously False
             map_location=torch.device(device)
         )
         
@@ -160,8 +160,57 @@ class loadData:
         data_species = data_state_space[species]
 
         return data_species
+    
+    def getAvgCosts(self, dataset_type, path_variance = "data-files/costs/variance/"):
 
+        penalty_function = 'log-sigma-over-peak'
+        power = 4
+        vertical_shift = 1
 
+        name_variance = f"variance_{self.filename}-dataset_{dataset_type}.npy"
+
+        variance = np.load(f"{path_variance}{name_variance}", allow_pickle=True).item()
+
+        #(derivative_without, bandwidth_values_without, max_derivative_without) = normalized_variance_derivative(variance)
+
+        costs = cost_function_normalized_variance_derivative(variance,
+                                                            penalty_function=penalty_function,
+                                                            power=power,
+                                                            vertical_shift=vertical_shift,
+                                                            norm=None)
+        
+        avgCost = compute_avg(np.array(costs))
+
+        return avgCost
+    
+    def getListQoIs(self):
+
+        depvar_names = self.metadata["list_species_output_evaluation"]
+        if(self.metadata["temperature_output"]):
+            depvar_names.append("T")
+        for i in range(1,1+self.metadata["PV_dim"]):
+            depvar_names.append(f"PV{i}")
+
+        return depvar_names
+    
+    def getQoICosts(self, dataset_type, path_variance = "data-files/costs/variance/"):
+        penalty_function = 'log-sigma-over-peak'
+        power = 4
+        vertical_shift = 1
+
+        name_variance = f"variance_{self.filename}-dataset_{dataset_type}.npy"
+
+        variance = np.load(f"{path_variance}{name_variance}", allow_pickle=True).item()
+
+        #(derivative_without, bandwidth_values_without, max_derivative_without) = normalized_variance_derivative(variance)
+
+        costs = cost_function_normalized_variance_derivative(variance,
+                                                            penalty_function=penalty_function,
+                                                            power=power,
+                                                            vertical_shift=vertical_shift,
+                                                            norm=None)
+
+        return costs
 
 
 #################################
