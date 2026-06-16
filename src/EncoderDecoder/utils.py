@@ -105,6 +105,87 @@ class loadData:
 
         self.filename_state_space_names = newFileStateSpaceNames
 
+    def getInputScalingBias(self, path_data, header = "infer"):
+        
+        general_dataset_type = self.metadata["general_dataset_type"]
+        dataset_type = self.metadata["dataset_type"]
+        list_species_input = self.metadata["list_species_input"]
+        perc_val = self.metadata["perc_val"]
+        input_scaling = self.metadata["input_scaling_name"]
+        my_seed = self.metadata["my_seed"]
+
+        generator = torch.Generator(device = "cpu")
+        generator.manual_seed(my_seed)
+
+        path_data_state_space = path_data + f"{general_dataset_type}-state-space-" + dataset_type + ".csv"
+        path_data_source = path_data + f"{general_dataset_type}-state-space_source-" + dataset_type + ".csv"
+        
+        #load the data
+        data_state_space = read_csv(path_data_state_space, header = header)
+        data_state_space_source = read_csv(path_data_source, header = header)
+
+        #selected input species
+        data_state_space = data_state_space[list_species_input]
+        data_state_space_source = data_state_space_source[list_species_input]
+        data_input = data_state_space
+
+        input = data_input.iloc[:,:].values
+        
+        #convert to PyTorch tensors
+        input_tensor = torch.tensor(input)
+        
+        #determine number of training and validation samples
+        dataset_size = input_tensor.size(0)
+        train_size = int((1-perc_val) * dataset_size)
+
+        #shuffle the indices
+        indices = torch.randperm(dataset_size, generator=generator)
+
+        #split in training and validation indices
+        train_indices = indices[:train_size]
+        val_indices = indices[train_size:]
+
+        #create input tensors for both training and validation
+        train_input, _ = input_tensor[train_indices], input_tensor[val_indices]
+
+        train_input_to_scale = train_input
+
+        if(input_scaling in ["0to1", "std", "pareto", "mean-pareto", "None"]):
+            mins = train_input_to_scale.min(dim=0, keepdim=True)[0]
+            maxs = train_input_to_scale.max(dim=0, keepdim=True)[0]
+            means = train_input_to_scale.mean(dim=0, keepdim=True)[0]
+            stds = train_input_to_scale.std(dim=0, unbiased = False)
+            nbr_columns = train_input_to_scale.shape[1]
+            zeroes = torch.zeros(1, nbr_columns)
+
+            if(input_scaling == "0to1"):
+                input_species_bias = mins
+                input_species_scaling = maxs - mins
+            elif(input_scaling == "std"):
+                input_species_bias = means
+                input_species_scaling = train_input_to_scale.std(dim=0, unbiased = False) #compute the population standard deviation (N, unbiased False)
+            elif(input_scaling == "pareto"):
+                input_species_bias = zeroes
+                input_species_scaling = torch.sqrt(stds)
+            elif(input_scaling == "mean-pareto"):
+                input_species_bias = means
+                input_species_scaling = torch.sqrt(stds)
+            elif(input_scaling == "None"):
+                input_species_scaling = torch.ones(1, nbr_columns)
+                input_species_bias = zeroes
+
+        elif(input_scaling=="-1to1"):
+            mins = train_input_to_scale.min(dim=0, keepdim=True)[0]
+            maxs = train_input_to_scale.max(dim=0, keepdim=True)[0]
+
+            input_species_scaling = maxs - mins
+            input_species_bias = mins
+
+        else:
+            raise ValueError("get_data: input scaling not recognized")
+        
+        return input_species_scaling, input_species_bias
+
     def getInputOutput(self, path_data, dataset_type):
         
         path_data = path_data
