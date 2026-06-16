@@ -272,7 +272,7 @@ class create_dirs:
     def load_model(self, model_params):
 
         model_reloaded = PV_autoencoder(**model_params)
-        model_reloaded.load_state_dict(torch.load('{}{}'.format(self.path_out, self.dirout), weights_only=False))
+        model_reloaded.load_state_dict(torch.load('{}{}'.format(self.path_out, self.dirout), weights_only=True)) #previously False
 
         return model_reloaded
 
