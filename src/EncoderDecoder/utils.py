@@ -43,9 +43,7 @@ class loadData:
         self.path_metadata = path_metadata
         self.filename = filename
         self.filename_metadata = self.filename + "_metadata.pkl"
-        print("before load metadata")
         self.metadata = self.loadMetadata()
-        print("after load metadata")
 
         self.filename_state_space_names = f"Xu-state-space-names{suffix_filename_state_space_names}.csv"
         self.filename_model = self.metadata["model_name"]
@@ -64,9 +62,7 @@ class loadData:
     def loadMetadata(self):
 
         with open(f'{self.path_metadata}/{self.filename_metadata}', 'rb') as f:
-            print("before pickle load")
             loaded_dict = pickle.load(f)
-            print("after pickle load")
 
         return loaded_dict
     
