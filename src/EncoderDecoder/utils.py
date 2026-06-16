@@ -223,7 +223,9 @@ class loadData:
 
         model = self.loadModel(self.filename_model)
 
-        output_with_PVsource = model.get_source_PV(output, self.metadata["input_species_scaling"])
+        input_species_scaling = self.getInputScalingBias(path_data)
+
+        output_with_PVsource = model.get_source_PV(output, input_species_scaling)
 
         extraVars, PV, _ = model.get_extraVar_PV_PVsource(input, output)
 
