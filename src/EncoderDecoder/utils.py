@@ -243,28 +243,6 @@ class loadData:
 
         return data_species
     
-    def getAvgCosts(self, dataset_type, path_variance = "data-files/costs/variance/"):
-
-        penalty_function = 'log-sigma-over-peak'
-        power = 4
-        vertical_shift = 1
-
-        name_variance = f"variance_{self.filename}-dataset_{dataset_type}.npy"
-
-        variance = np.load(f"{path_variance}{name_variance}", allow_pickle=True).item()
-
-        #(derivative_without, bandwidth_values_without, max_derivative_without) = normalized_variance_derivative(variance)
-
-        costs = cost_function_normalized_variance_derivative(variance,
-                                                            penalty_function=penalty_function,
-                                                            power=power,
-                                                            vertical_shift=vertical_shift,
-                                                            norm=None)
-        
-        avgCost = compute_avg(np.array(costs))
-
-        return avgCost
-    
     def getListQoIs(self):
 
         depvar_names = self.metadata["list_species_output_evaluation"]
@@ -284,8 +262,6 @@ class loadData:
 
         variance = np.load(f"{path_variance}{name_variance}", allow_pickle=True).item()
 
-        #(derivative_without, bandwidth_values_without, max_derivative_without) = normalized_variance_derivative(variance)
-
         costs = cost_function_normalized_variance_derivative(variance,
                                                             penalty_function=penalty_function,
                                                             power=power,
@@ -293,7 +269,14 @@ class loadData:
                                                             norm=None)
 
         return costs
+    
+    def getAvgCosts(self, dataset_type, path_variance = "data-files/costs/variance/"):
 
+        costs = self.getQoICosts(dataset_type, path_variance)
+        
+        avgCost = compute_avg(np.array(costs))
+
+        return avgCost
 
 #################################
 #Create directories and filenames
