@@ -193,6 +193,7 @@ class loadData:
         dataset_type = self.metadata["dataset_type"]
         list_species_input = self.metadata["list_species_input"]
         list_species_output = self.metadata["list_species_output_evaluation"]
+        print(list_species_output)
         input_scaling_name = self.metadata["input_scaling_name"]
         input_scaling, input_bias = self.getInputScalingBias(path_data)
         temperature_at_output = self.metadata["temperature_output"]
