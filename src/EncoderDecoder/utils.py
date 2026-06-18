@@ -194,9 +194,7 @@ class loadData:
         list_species_input = self.metadata["list_species_input"]
         list_species_output = self.metadata["list_species_output_evaluation"]
         input_scaling_name = self.metadata["input_scaling_name"]
-        #input_scaling, input_bias = self.getInputScalingBias(path_data)
-        input_scaling = self.metadata["input_species_scaling"]
-        input_bias = self.metadata["input_species_bias"]
+        input_scaling, input_bias = self.getInputScalingBias(path_data)
         temperature_at_output = self.metadata["temperature_output"]
         header = "infer"
         extra_manifold_variables = self.metadata["extra_manifold_parameters"]
@@ -225,9 +223,9 @@ class loadData:
 
         model = self.loadModel(self.filename_model)
 
-        #input_species_scaling, _ = self.getInputScalingBias(path_data)
+        input_species_scaling, _ = self.getInputScalingBias(path_data)
 
-        output_with_PVsource = model.get_source_PV(output, self.metadata["input_species_scaling"])
+        output_with_PVsource = model.get_source_PV(output, input_species_scaling)
 
         extraVars, PV, _ = model.get_extraVar_PV_PVsource(input, output)
 
